@@ -28,8 +28,7 @@ nav a:hover {
 }
 
 .hero {
-  background-image: url("img/pizza-background.jpg"); /* Substitua pelo caminho correto da imagem */
-  background-size: cover;
+  background-image: url("img/pizza-background.jpg");
   background-position: center;
   padding: 100px 20px;
   text-align: center;
