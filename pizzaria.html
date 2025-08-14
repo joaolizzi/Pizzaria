@@ -1,136 +1,482 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lizzi's Pizzaria</title>
-  <link rel="stylesheet" href="pizzaria.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Roleta - Versão estilo "tigrinho" (alternativa legal)</title>
+<style>
+  :root{
+    --bg:#0f1724;
+    --card:#0b1220;
+    --accent:#ffb020;
+    --muted:#9aa6b2;
+    --glass: rgba(255,255,255,0.04);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background: linear-gradient(180deg,var(--bg) 0%, #071024 100%);
+    color:#e6eef6;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+
+  .app{
+    width:100%;
+    max-width:920px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:14px;
+    padding:20px;
+    box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+    display:grid;
+    grid-template-columns: 1fr 340px;
+    gap:20px;
+  }
+
+  @media (max-width:880px){
+    .app{grid-template-columns: 1fr; padding:16px;}
+  }
+
+  .game{
+    padding:18px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+    border-radius:10px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  .header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .title{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .logo{
+    width:46px; height:46px; border-radius:10px;
+    background:linear-gradient(135deg,#ffb020,#ff6b6b);
+    display:flex;align-items:center;justify-content:center;font-weight:700;
+    color:#051725; font-size:20px;
+    box-shadow: 0 6px 14px rgba(255,176,32,0.12);
+  }
+  .h1{font-size:18px; margin:0;}
+  .muted{color:var(--muted); font-size:13px}
+
+  /* reels area */
+  .reels-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    padding:12px;
+    background:var(--glass);
+    border-radius:10px;
+    min-height:220px;
+  }
+
+  .reel{
+    width:110px;
+    height:160px;
+    overflow:hidden;
+    border-radius:10px;
+    background:linear-gradient(180deg,#071827, #0b2838);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 8px 18px rgba(2,6,23,0.6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+
+  .reel-track{
+    position:absolute;
+    width:100%;
+    top:0;
+    left:0;
+  }
+
+  .symbol{
+    height:160px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:52px;
+    user-select:none;
+  }
+
+  .controls{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:6px;
+  }
+  .bets{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  input[type=number]{
+    width:120px;padding:8px;border-radius:8px;border:0;background:#071827;color:#dff0ff;font-weight:600;
+    box-shadow: inset 0 -4px 20px rgba(0,0,0,0.6);
+  }
+
+  button{
+    border:0;
+    padding:12px 18px;
+    border-radius:10px;
+    background:var(--accent);
+    color:#051725;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow: 0 8px 18px rgba(255,176,32,0.12);
+  }
+  button:active{transform:translateY(1px)}
+  .spin-btn{
+    width:100%;
+    font-size:18px;
+    display:block;
+  }
+
+  .panel{
+    padding:16px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
+    border-radius:10px;
+  }
+
+  .stats{
+    display:flex;gap:10px;flex-direction:column;
+  }
+  .stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;}
+  .big{font-size:20px;font-weight:700}
+  .small{font-size:13px;color:var(--muted)}
+
+  .result{
+    margin-top:10px;
+    font-weight:700;
+    font-size:16px;
+    min-height:24px;
+    color:#cde7ff;
+  }
+
+  footer.note{font-size:12px;color:var(--muted);margin-top:8px}
+
+  /* nice shimmer for winning reels */
+  .win {
+    box-shadow: 0 0 18px rgba(255,200,50,0.18), 0 6px 30px rgba(255,140,20,0.06) !important;
+    transform: scale(1.03);
+  }
+</style>
 </head>
-
 <body>
-  <header>
-    <nav>
-      <ul>
-        <li><a href="#home">Home</a></li>
-        <li><a href="#menu">Cardápio</a></li>
-        <li><a href="#about">Sobre Nós</a></li>
-        <li><a href="#contact">Contato</a></li>
-      </ul>
-    </nav>
-  </header>
+  <div class="app" role="application" aria-label="Slot game">
+    <div class="game">
+      <div class="header">
+        <div class="title">
+          <div class="logo">RT</div>
+          <div>
+            <div class="h1">Roleta Alternativa</div>
+            <div class="muted">Toque em SPIN — jogo só para diversão</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="small">Versão: demo</div>
+          <div class="muted" style="font-size:12px">Sem dinheiro real</div>
+        </div>
+      </div>
 
-  <section id="home">
-    <div class="hero">
-      <h1>Bem-vindo à Lizzi's</h1>
-      <p>Saborosas pizzas feitas especialmente para você!</p>
-      <a href="#menu" class="cta-button">Ver Cardápio</a>
+      <div class="reels-wrap" id="reelsWrap" aria-hidden="false">
+        <div class="reel" id="reel0" aria-label="Rolo 1">
+          <div class="reel-track" id="track0"></div>
+        </div>
+        <div class="reel" id="reel1" aria-label="Rolo 2">
+          <div class="reel-track" id="track1"></div>
+        </div>
+        <div class="reel" id="reel2" aria-label="Rolo 3">
+          <div class="reel-track" id="track2"></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="bets">
+          <label class="small" for="bet">Aposta</label>
+          <input id="bet" type="number" min="1" step="1" value="5" aria-label="Valor da aposta" />
+          <button id="minBet">-</button>
+          <button id="maxBet">+</button>
+        </div>
+        <div style="flex:1"></div>
+        <div style="width:220px">
+          <button id="spin" class="spin-btn" aria-live="polite">SPIN</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="stats">
+          <div class="stat-row"><div class="small">Saldo</div><div id="balance" class="big">100</div></div>
+          <div class="stat-row"><div class="small">Último ganho</div><div id="lastWin" class="big">-</div></div>
+          <div class="result" id="resultText" aria-live="polite"></div>
+        </div>
+        <div class="note">Use o botão SPIN. Não é jogo de azar real — apenas diversão.</div>
+      </div>
     </div>
-  </section>
 
-  <section id="menu">
-    <h2>Cardápio</h2>
-    <ul class="menu-list">
-      <li>
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZqwd1GAcTnttIq_uzAqMx2sZwUGIk2ElyyQ&s">
-        <h3>Pizza Margherita</h3>
-        <p>Molho de tomate, mussarela, manjericão fresco.</p>
-      </li>
-      <li>
-        <img src="data:image/jpeg;base64,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"== alt="Pizza Pepperoni">
-        <h3>Pizza Pepperoni</h3>
-        <p>Molho de tomate, pepperoni, queijo mussarela.</p>
-      </li>
-      <li>
-        <img src="https://redefoodservice.com.br/wp-content/uploads/2023/07/Pizza-Quatro-Queijos.jpg" alt="Pizza Quatro Queijos">
-        <h3>Pizza Quatro Queijos</h3>
-        <p>Molho de tomate, mussarela, parmesão, gorgonzola, provolone.</p>
-      </li>
-      <li>
-        <img src="https://media.istockphoto.com/id/521403691/pt/foto/quente-feito-em-casa-pizza-de-pepperoni.jpg?s=612x612&w=0&k=20&c=KWGroPbutn4ruhgedMeQ6vvPhFULRrnCMtV5coxr1AI=" alt="Pizza Calabresa">
-        <h3>Pizza Calabresa</h3>
-        <p>Molho de tomate, calabresa, cebola, queijo mussarela.</p>
-      </li>
-      <li>
-        <img src="https://media.istockphoto.com/id/1279000076/pt/foto/freshly-baked-pizza-with-arugula-tomato-red-onion-and-mozzarella.jpg?s=612x612&w=0&k=20&c=Lba8w1TC5QZX_iZntgGkmBUNLr3n0tVSko8p2IixQ2s=" alt="Pizza Vegetariana">
-        <h3>Pizza Vegetariana</h3>
-        <p>Molho de tomate, pimentões, cogumelos, azeitonas, queijo mussarela.</p>
-      </li>
-      <li>
-        <img src="https://deliverypostoauto7.com.br/media/produtos/_dsc8139_frango_catupiry.jpg" alt="Pizza Frango com Catupiry">
-        <h3>Pizza Frango com Catupiry</h3>
-        <p>Molho de tomate, frango desfiado, catupiry, milho, queijo mussarela.</p>
-      </li>
-      <li>
-        <img src="https://receitasde.com.br/wp-content/uploads/2024/07/Pizza-Portuguesa.jpg" alt="Pizza Portuguesa">
-        <h3>Pizza Portuguesa</h3>
-        <p>Molho de tomate, presunto, ovos, cebola, azeitonas, queijo mussarela.</p>
-      </li>
-      <li>
-        <img src="https://media.istockphoto.com/id/153784617/pt/foto/fatia-de-pizza-supremo-levante.jpg?s=612x612&w=0&k=20&c=0FoV-nHjbXfIxm2FY2vvUKa0ciFytRh9dKjxbg7Avlo=" alt="Pizza Supreme">
-        <h3>Pizza Supreme</h3>
-        <p>Molho de tomate, pepperoni, pimentões, cebola roxa, azeitonas, queijo mussarela.</p>
-      </li>
-      <li>
-        <img src="https://receitasdepesos.com.br/wp-content/uploads/2023/12/pizza-havaiana.jpg.webp" alt="Pizza Tropical">
-        <h3>Pizza Tropical</h3>
-        <p>Molho de tomate, presunto, abacaxi, queijo mussarela.</p>
-      </li>
-      <li>
-        <img src="https://irp.cdn-website.com/33406c6e/dms3rep/multi/margherita-7d163fb8.jpg" alt="Pizza Margherita Especial">
-        <h3>Pizza Margherita Especial</h3>
-        <p>Molho de tomate, mussarela de búfala, tomate fresco, manjericão, azeite de oliva.</p>
-      </li>
-      <li>
-        <img src="https://meeupedido.nyc3.cdn.digitaloceanspaces.com/estabelecimento/141/produtos/2023010839070123bbc7e182je.jpg" alt="Pizza Carne de Sol">
-        <h3>Pizza Carne de Sol</h3>
-        <p>Molho de tomate, carne de sol desfiada, cebola roxa, queijo mussarela.</p>
-      </li>
-      <li>
-        <img src="https://as1.ftcdn.net/jpg/00/41/32/66/1000_F_41326656_2EohuZunHyNjvBqHGEu356lYL2MVACU2.jpg" alt="Pizza Caprese">
-        <h3>Pizza Caprese</h3>
-        <p>Molho de tomate, tomate fresco, mussarela de búfala, manjericão, azeite de oliva.</p>
-      </li>
-    </ul>
-  </section>
-
-  <section id="about">
-    <h2>Sobre Nós</h2>
-    <p>Nossa pizzaria é dedicada a criar as melhores pizzas do mundo, com ingredientes frescos e receitas exclusivas.
-    </p>
-  </section>
-
-  <section id="contact">
-    <h2>Contato</h2>
-
-    <p>Entre em contato conosco para fazer pedidos ou tirar suas dúvidas.</p>
-
-    <address>
-      <p>
-        <strong>Endereço:</strong>
-        Avenida Onze de Outubro, nº 123<br>
-        Centro, Cidade Qualquer/RJ CEP: 12345-678
-      </p>
-
-      <div>
-        <p><strong>Telefone:</strong> (11) 5555-5555</p>
-        <p>
-          <strong>E-mail:</strong>
-          <a href="mailto:contato@alessios.pizza">contato@alessios.pizza</a>
-        </p>
+    <div class="panel" aria-label="Informações">
+      <h3 style="margin-top:0">Regras & Pagamentos</h3>
+      <ul style="padding-left:18px;margin:6px 0;color:var(--muted)">
+        <li>3 iguais — paga 10× a aposta</li>
+        <li>2 iguais — paga 2× a aposta</li>
+        <li>Ícones únicos e imaginários — jogo criado para aprendizado e diversão</li>
+      </ul>
+      <div style="margin-top:12px">
+        <strong>Ícones:</strong>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <!-- legenda dos símbolos -->
+          <div style="display:flex;gap:8px;align-items:center;"><span style="font-size:26px">🍊</span><small class="muted">Laranja</small></div>
+          <div style="display:flex;gap:8px;align-items:center;"><span style="font-size:26px">🍋</span><small class="muted">Limão</small></div>
+          <div style="display:flex;gap:8px;align-items:center;"><span style="font-size:26px">🍒</span><small class="muted">Cereja</small></div>
+          <div style="display:flex;gap:8px;align-items:center;"><span style="font-size:26px">⭐</span><small class="muted">Estrela</small></div>
+          <div style="display:flex;gap:8px;align-items:center;"><span style="font-size:26px">🐯</span><small class="muted">Tigre (icone original)</small></div>
+          <div style="display:flex;gap:8px;align-items:center;"><span style="font-size:26px">🍇</span><small class="muted">Uva</small></div>
+        </div>
       </div>
 
-      <div>
-        <p><strong>Horário de Funcionamento:</strong></p>
-        <p>Segunda a Sábado das 11h00 às 23h00 - Domingo das 16h00 às 23h00</p>
-        <p></p>
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:14px 0" />
+      <div style="font-size:13px;color:var(--muted)">
+        Dica: toque o SPIN com o polegar para jogar no celular. Código aberto — personalize os ícones e pagamentos como quiser.
       </div>
-    </address>
-  </section>
+    </div>
+  </div>
 
-  <footer>
-    <p>&copy; 2024 Alessio's Pizzaria</p>
-  </footer>
+<script>
+/*
+  Slot machine demo
+  - 3 reels
+  - Symbols array uses emoji (can replace by inline SVGs)
+  - Physics: each reel will spin with random extra rotations and stop at a symbol index
+*/
+
+const symbols = ["🍊","🍋","🍒","⭐","🐯","🍇","🍉","🔔","🍍"]; // 9 symbols
+const reels = 3;
+const symbolHeight = 160; // must match .symbol height in CSS
+let balanceEl = document.getElementById('balance');
+let lastWinEl = document.getElementById('lastWin');
+let resultText = document.getElementById('resultText');
+let betInput = document.getElementById('bet');
+let spinBtn = document.getElementById('spin');
+
+let balance = 100;
+let spinning = false;
+let lastWin = 0;
+
+function format(n){ return Math.round(n*100)/100; }
+function updateUI(){
+  balanceEl.textContent = format(balance);
+  lastWinEl.textContent = lastWin>0 ? "+"+format(lastWin) : (lastWin===0? '-' : '-' + format(Math.abs(lastWin)));
+}
+
+updateUI();
+
+// Create tracks: each track will contain symbol nodes repeated multiple times to allow smooth scroll
+for(let r=0;r<reels;r++){
+  const track = document.getElementById('track'+r);
+  track.style.transition = 'none';
+  // Fill the track with multiple cycles of symbols to allow long scroll
+  for(let rep=0; rep<6; rep++){
+    for(let s=0;s<symbols.length;s++){
+      const el = document.createElement('div');
+      el.className = 'symbol';
+      el.innerText = symbols[s];
+      track.appendChild(el);
+    }
+  }
+  // Clone first symbol at end so loop looks nicer
+}
+
+// Utility to get random integer
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min }
+
+// Do a spin
+spinBtn.addEventListener('click', async ()=>{
+  if(spinning) return;
+  let bet = Number(betInput.value) || 0;
+  if(bet <= 0){ resultText.textContent = 'Aposta inválida.'; return; }
+  if(bet > balance){ resultText.textContent = 'Saldo insuficiente.'; return; }
+  spinning = true;
+  spinBtn.disabled = true;
+  resultText.textContent = '';
+  balance -= bet;
+  updateUI();
+
+  // Choose final symbol indices for each reel
+  const finalIndices = [];
+  for(let r=0;r<reels;r++){
+    finalIndices.push(randInt(0, symbols.length-1));
+  }
+
+  // For visual fairness, make center symbol the result.
+  // We'll animate each reel with different durations and easing via JS loop.
+  const promises = [];
+  for(let r=0;r<reels;r++){
+    promises.push(spinReel(r, finalIndices[r], 2000 + r*500 + randInt(0,600)));
+  }
+
+  // Wait for all to finish
+  await Promise.all(promises);
+
+  // Determine payout
+  // If all three equal
+  const [a,b,c] = finalIndices;
+  let win = 0;
+  if(a===b && b===c){
+    win = bet * 10;
+    resultText.textContent = `Três ${symbols[a]}! Você ganhou ${win} moedas 🎉`;
+    // visual highlight
+    highlightWinningReels([0,1,2]);
+  } else if(a===b || b===c || a===c){
+    win = bet * 2;
+    resultText.textContent = `Dois iguais! Você ganhou ${win} moedas ✨`;
+    // find which reels match
+    const winners = [];
+    if(a===b) winners.push(0,1);
+    if(b===c) winners.push(1,2);
+    if(a===c) winners.push(0,2);
+    highlightWinningReels([...new Set(winners)]);
+  } else {
+    resultText.textContent = 'Que pena — sem combinação. Tente novamente.';
+  }
+
+  balance += win;
+  lastWin = win;
+  updateUI();
+
+  // small pause for UX
+  setTimeout(()=>{ spinning=false; spinBtn.disabled=false; }, 350);
+
+});
+
+// spinReel: animates track to land with center symbol = index
+function spinReel(reelIndex, targetSymbolIndex, durationMs){
+  return new Promise(resolve=>{
+    const track = document.getElementById('track'+reelIndex);
+    // The track currently is multiple repetitions of symbols. We'll move it vertically.
+    // compute how many symbol-steps to spin: base cycles + offset to target
+    // pick a large offset for a longer spin
+    const cycles = randInt(6,9); // how many full cycles
+    const totalSymbols = symbols.length * cycles + targetSymbolIndex;
+    const finalOffset = totalSymbols * symbolHeight;
+
+    // reset transition to none to set starting translate
+    track.style.transition = 'none';
+
+    // compute current translateY (if any)
+    const currentTransform = getComputedStyle(track).transform;
+    let currentY = 0;
+    if(currentTransform && currentTransform !== 'none'){
+      const vals = currentTransform.match(/matrix.*\((.+)\)/)[1].split(', ');
+      currentY = parseFloat(vals[5]);
+    }
+
+    // set start position a little negative so movement feels centered
+    // apply transform directly to allow transition
+    // We'll animate from currentY to -finalOffset (negative because moving up)
+    // For simplicity, set start to 0, set translateY to 0 now
+    track.style.transform = `translateY(${currentY}px)`;
+
+    // Force reflow to ensure styles applied
+    track.getBoundingClientRect();
+
+    // Apply transition for duration with cubic-bezier easing (nice ease-out)
+    track.style.transition = `transform ${durationMs}ms cubic-bezier(0.16, 0.84, 0.26, 1)`;
+    track.style.transform = `translateY(${-finalOffset}px)`;
+
+    // After transition ends, snap the DOM so we don't accumulate huge offsets
+    const cleanup = ()=>{
+      // remove listener
+      track.removeEventListener('transitionend', cleanup);
+      // compute which symbol is at top after finalOffset: modulo symbols.length
+      // We'll set transform to a small value showing the chosen symbol centered:
+      const offsetSymbols = totalSymbols % symbols.length;
+      // rebuild track to a neutral state: set transform to negative (offsetSymbols * symbolHeight)
+      // To avoid jank, temporarily disable transition
+      track.style.transition = 'none';
+      // Build a new shorter track that ensures target symbol is at the first visible position
+      // Clear nodes and add a few symbols around the target for visual continuity
+      track.innerHTML = '';
+      // add 4 symbols above, target, and 4 below (wrap using modulo)
+      const context = 4;
+      for(let i=-context; i<=context; i++){
+        const idx = mod(targetSymbolIndex + i, symbols.length);
+        const el = document.createElement('div');
+        el.className = 'symbol';
+        el.innerText = symbols[idx];
+        track.appendChild(el);
+      }
+      // position so that the middle symbol (context index) is visible
+      const newOffset = -context * symbolHeight;
+      track.style.transform = `translateY(${newOffset}px)`;
+      // small timeout to re-enable interactions
+      setTimeout(()=>resolve(),50);
+    };
+
+    // Listen for transition end
+    track.addEventListener('transitionend', cleanup);
+  });
+}
+
+function mod(n,m){ return ((n % m) + m) % m; }
+
+// highlight reels indexes (array)
+function highlightWinningReels(indexes){
+  // add class to reel elements for a moment
+  indexes.forEach(i=>{
+    const el = document.getElementById('reel'+i);
+    el.classList.add('win');
+    setTimeout(()=>el.classList.remove('win'), 1400);
+  });
+}
+
+/* small helpers for bet buttons */
+document.getElementById('minBet').addEventListener('click', ()=>{
+  let v = Number(betInput.value)||1;
+  v = Math.max(1, Math.floor(v/2));
+  betInput.value = v;
+});
+document.getElementById('maxBet').addEventListener('click', ()=>{
+  let v = Number(betInput.value)||1;
+  v = Math.min(9999, Math.floor(v*2));
+  betInput.value = v;
+});
+
+// Accessibility: allow Enter to spin
+betInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ spinBtn.click(); } });
+
+// Initialize simple static tracks for first view (so the reels look filled before spin)
+(function initTracks(){
+  for(let r=0;r<reels;r++){
+    const track = document.getElementById('track'+r);
+    // ensure it shows first symbols centered
+    track.innerHTML = '';
+    const context = 4;
+    for(let i=-context;i<=context;i++){
+      const idx = mod(i, symbols.length);
+      const el = document.createElement('div');
+      el.className = 'symbol';
+      el.innerText = symbols[idx];
+      track.appendChild(el);
+    }
+    // position so that center symbol is visible
+    track.style.transform = `translateY(${-context*symbolHeight}px)`;
+  }
+})();
+</script>
 </body>
-
 </html>
